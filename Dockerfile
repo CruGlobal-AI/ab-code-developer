@@ -1,18 +1,21 @@
 ##
-## digiserve/ab-code-developer:master
+## ghcr.io/cruglobal-ai/ab-code-developer:master
 ##
 ## This is a collection of our github projects for a developer install.
 ## We use this upon install to copy over our repositories.
 ##
 ## Docker Commands:
 ## ---------------
-## $ docker build -t digiserve/ab-code-developer:master .
-## $ docker push digiserve/ab-code-developer:master
+## $ docker build -t ghcr.io/cruglobal-ai/ab-code-developer:master .
+## $ docker push ghcr.io/cruglobal-ai/ab-code-developer:master
 ##
 
 ARG BRANCH=master
 
-FROM digiserve/service-cli:${BRANCH}
+FROM ghcr.io/cruglobal-ai/service-cli:${BRANCH}
+
+# GitHub org to clone AppBuilder repos from (read by buildContainer.js)
+ARG AB_GITHUB_ORG=CruGlobal-AI
 
 RUN apt-get update \
     && apt-get install -y \

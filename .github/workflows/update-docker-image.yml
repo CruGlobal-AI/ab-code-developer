@@ -9,22 +9,23 @@ on:
 
 jobs:
   publish:
-    name: Push image to Docker Hub
+    name: Push image to GHCR
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Extract branch name
         shell: bash
         run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
         id: branch
 
-      - name: Derive docker hub repo name
-        id: repo_name
+      - name: Derive image name
+        id: image
         shell: bash
-        run: |
-          REGEX="/(.+)"
-          [[ "${{ github.repository }}" =~ $REGEX ]]
-          DOCKER_HUB_REPO=${BASH_REMATCH[1]}
-          echo "docker_hub_repo=$DOCKER_HUB_REPO" >> $GITHUB_OUTPUT
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: echo "name=ghcr.io/${OWNER,,}/${GITHUB_REPOSITORY#*/}" >> $GITHUB_OUTPUT
 
       - name: Get commit sha
         id: sha
@@ -33,17 +34,20 @@ jobs:
       - name: Check out the git repo
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push to Docker Hub
+      - name: Build and push to GHCR
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
+          build-args: AB_GITHUB_ORG=${{ github.repository_owner }}
+          labels: org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
           tags: |
-            digiserve/${{ steps.repo_name.outputs.docker_hub_repo }}:${{ steps.branch.outputs.branch }}
-            digiserve/${{ steps.repo_name.outputs.docker_hub_repo }}:${{ steps.sha.outputs.short }}
+            ${{ steps.image.outputs.name }}:${{ steps.branch.outputs.branch }}
+            ${{ steps.image.outputs.name }}:${{ steps.sha.outputs.short }}
