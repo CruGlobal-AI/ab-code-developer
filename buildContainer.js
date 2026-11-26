@@ -8,6 +8,9 @@ const fs = require("fs");
 const path = require("path");
 const shell = require("shelljs");
 
+// GitHub org to clone AppBuilder repos from (CruGlobal-AI fork by default).
+const GITHUB_ORG = process.env.AB_GITHUB_ORG || "CruGlobal-AI";
+
 const Repos = {
    /* repo name  :  directory name */
    ab_platform_web: "ab_platform_web",
@@ -88,7 +91,7 @@ async function initService(list) {
    var repoName = list.shift();
    let dirName = Repos[repoName];
 
-   var gitURL = `https://github.com/digi-serve/${repoName}.git`;
+   var gitURL = `https://github.com/${GITHUB_ORG}/${repoName}.git`;
 
    console.log(`... [${pos}] processing ${repoName} `);
 
@@ -107,7 +110,7 @@ async function installPlugins(list) {
    console.log(`... [${pos}] plugin ${plugin}`);
 
    const repoName = `plugin_${plugin}`;
-   const gitURL = `https://github.com/digi-serve/${repoName}.git`;
+   const gitURL = `https://github.com/${GITHUB_ORG}/${repoName}.git`;
 
    gitInstall(pluginDir, gitURL, plugin);
 
@@ -115,7 +118,7 @@ async function installPlugins(list) {
 }
 async function installPWA() {
    console.log(`... appbuilder_platform_pwa`);
-   const gitURL = `https://github.com/CruGlobal/appbuilder_platform_pwa.git`;
+   const gitURL = `https://github.com/${GITHUB_ORG}/appbuilder_platform_pwa.git`;
    gitInstall(devDir, gitURL, "appbuilder_platform_pwa");
 }
 /*
